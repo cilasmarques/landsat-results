@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Caminho base para os diretórios principais
-BASE_DIRS=("output-kernels" "output-cpp" "output-hybrid")
+BASE_DIRS=("output")
 
 # Loop por cada diretório base
 for base_dir in "${BASE_DIRS[@]}"; do
