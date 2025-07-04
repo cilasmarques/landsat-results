@@ -5,6 +5,8 @@ Script para sumarizar dados de tempo e utilização de recursos das estratégias
 Este script processa todos os arquivos CSV de tempo, CPU e GPU de todas as estratégias
 e algoritmos, calculando estatísticas (mediana, média, desvio padrão, etc.) e salvando
 os resultados em arquivos CSV dentro de cada diretório de estratégia/algoritmo.
+
+Agora também mapeia dados de CPU e GPU por fase usando os timestamps de início e fim.
 """
 
 import pandas as pd
@@ -81,6 +83,73 @@ def load_gpu_data(experiment_dir):
             return None
     return None
 
+def map_resources_to_phases(time_df, resource_df, resource_type):
+    """Mapeia dados de recursos (CPU/GPU) para cada fase baseado nos timestamps"""
+    if time_df is None or resource_df is None:
+        return None
+    
+    phase_resource_data = []
+    
+    for _, phase_row in time_df.iterrows():
+        phase_name = phase_row['PHASE']
+        start_time = phase_row['START_TIME']
+        end_time = phase_row['END_TIME']
+        experiment = phase_row['experiment']
+        strategy = phase_row['STRATEGY']
+        
+        # Converte os timestamps das fases para a mesma escala dos recursos
+        # Os timestamps das fases estão em nanosegundos, os recursos em segundos
+        start_time_sec = start_time // 1000000000  # Converte para segundos
+        end_time_sec = end_time // 1000000000      # Converte para segundos
+        
+        # Filtra dados de recursos que estão dentro do intervalo da fase
+        phase_resources = resource_df[
+            (resource_df['experiment'] == experiment) &
+            (resource_df['TIMESTAMP'] >= start_time_sec) &
+            (resource_df['TIMESTAMP'] <= end_time_sec)
+        ].copy()
+        
+        if not phase_resources.empty:
+            # Calcula estatísticas para cada métrica disponível
+            stats = {}
+            
+            if resource_type == 'cpu':
+                metrics = ['CPU_USAGE_PERCENTAGE', 'MEM_USAGE_PERCENTAGE', 'MEM_USAGE_MB']
+            else:  # gpu
+                metrics = ['GPU_USAGE_PERCENTAGE', 'MEM_USAGE_PERCENTAGE', 'MEM_USAGE_MB', 'POWER_W', 'TEMP_C']
+            
+            for metric in metrics:
+                if metric in phase_resources.columns:
+                    values = phase_resources[metric].dropna()
+                    if not values.empty:
+                        stats[f'{metric}_median'] = values.median()
+                        stats[f'{metric}_mean'] = values.mean()
+                        stats[f'{metric}_max'] = values.max()
+                        stats[f'{metric}_min'] = values.min()
+                        stats[f'{metric}_std'] = values.std()
+                        stats[f'{metric}_count'] = len(values)
+                    else:
+                        stats[f'{metric}_median'] = np.nan
+                        stats[f'{metric}_mean'] = np.nan
+                        stats[f'{metric}_max'] = np.nan
+                        stats[f'{metric}_min'] = np.nan
+                        stats[f'{metric}_std'] = np.nan
+                        stats[f'{metric}_count'] = 0
+            
+            # Adiciona informações da fase
+            stats['PHASE'] = phase_name
+            stats['STRATEGY'] = strategy
+            stats['experiment'] = experiment
+            stats['START_TIME'] = start_time
+            stats['END_TIME'] = end_time
+            stats['PHASE_DURATION'] = end_time - start_time
+            
+            phase_resource_data.append(stats)
+    
+    if phase_resource_data:
+        return pd.DataFrame(phase_resource_data)
+    return None
+
 def save_summary_to_csv(summary_df, results_dir, strategy, algorithm, metric_type):
     """Salva o resumo em um arquivo CSV dentro do diretório results"""
     if summary_df is not None and not summary_df.empty:
@@ -97,11 +166,15 @@ def save_summary_to_csv(summary_df, results_dir, strategy, algorithm, metric_typ
             filename = 'cpu-time.csv'
         elif metric_type == 'gpu':
             filename = 'gpu-time.csv'
+        elif metric_type == 'cpu_by_phase':
+            filename = 'cpu-by-phase.csv'
+        elif metric_type == 'gpu_by_phase':
+            filename = 'gpu-by-phase.csv'
         else:
             filename = f'{metric_type}-time.csv'
         
         output_file = strategy_dir / filename
-        summary_df.to_csv(output_file, index=True)
+        summary_df.to_csv(output_file, index=False)
         print(f"  Salvo: {output_file}")
     else:
         print(f"  Nenhum dado para salvar em {metric_type}")
@@ -248,6 +321,80 @@ def summarize_gpu_data(base_path, strategy, algorithm):
     print(f"  Processados {len(combined_df)} registros de GPU")
     return summary
 
+def summarize_resources_by_phase(base_path, strategy, algorithm):
+    """Sumariza dados de CPU e GPU mapeados por fase"""
+    print(f"Processando recursos por fase para {strategy}/{algorithm}...")
+    
+    experiment_dirs = get_experiment_dirs(base_path, strategy, algorithm)
+    print(f"  Encontrados {len(experiment_dirs)} experimentos")
+    
+    all_cpu_by_phase = []
+    all_gpu_by_phase = []
+    
+    for exp_dir in experiment_dirs:
+        # Carrega dados de tempo, CPU e GPU
+        time_df = load_time_data(exp_dir)
+        cpu_df = load_cpu_data(exp_dir)
+        gpu_df = load_gpu_data(exp_dir)
+        
+        if time_df is not None:
+            # Mapeia CPU por fase
+            if cpu_df is not None:
+                cpu_by_phase = map_resources_to_phases(time_df, cpu_df, 'cpu')
+                if cpu_by_phase is not None:
+                    all_cpu_by_phase.append(cpu_by_phase)
+            
+            # Mapeia GPU por fase (apenas para estratégias não-serial)
+            if strategy != 'serial' and gpu_df is not None:
+                gpu_by_phase = map_resources_to_phases(time_df, gpu_df, 'gpu')
+                if gpu_by_phase is not None:
+                    all_gpu_by_phase.append(gpu_by_phase)
+    
+    # Combina dados de CPU por fase
+    cpu_summary = None
+    if all_cpu_by_phase:
+        combined_cpu = pd.concat(all_cpu_by_phase, ignore_index=True)
+        
+        # Calcula estatísticas por fase
+        cpu_metrics = [col for col in combined_cpu.columns if any(metric in col for metric in ['CPU_USAGE_PERCENTAGE', 'MEM_USAGE_PERCENTAGE', 'MEM_USAGE_MB'])]
+        
+        if cpu_metrics:
+            agg_dict = {}
+            for metric in cpu_metrics:
+                if metric.endswith(('_median', '_mean', '_max', '_min', '_std', '_count')):
+                    agg_dict[metric] = ['median', 'mean', 'std', 'min', 'max']
+            
+            if agg_dict:
+                cpu_summary = combined_cpu.groupby(['STRATEGY', 'PHASE']).agg(agg_dict).round(6)
+                cpu_summary.columns = ['_'.join(col).strip() for col in cpu_summary.columns]
+                cpu_summary = cpu_summary.reset_index()
+                cpu_summary['strategy'] = strategy
+                cpu_summary['algorithm'] = algorithm
+    
+    # Combina dados de GPU por fase
+    gpu_summary = None
+    if all_gpu_by_phase:
+        combined_gpu = pd.concat(all_gpu_by_phase, ignore_index=True)
+        
+        # Calcula estatísticas por fase
+        gpu_metrics = [col for col in combined_gpu.columns if any(metric in col for metric in ['GPU_USAGE_PERCENTAGE', 'MEM_USAGE_PERCENTAGE', 'MEM_USAGE_MB', 'POWER_W', 'TEMP_C'])]
+        
+        if gpu_metrics:
+            agg_dict = {}
+            for metric in gpu_metrics:
+                if metric.endswith(('_median', '_mean', '_max', '_min', '_std', '_count')):
+                    agg_dict[metric] = ['median', 'mean', 'std', 'min', 'max']
+            
+            if agg_dict:
+                gpu_summary = combined_gpu.groupby(['STRATEGY', 'PHASE']).agg(agg_dict).round(6)
+                gpu_summary.columns = ['_'.join(col).strip() for col in gpu_summary.columns]
+                gpu_summary = gpu_summary.reset_index()
+                gpu_summary['strategy'] = strategy
+                gpu_summary['algorithm'] = algorithm
+    
+    print(f"  Processados recursos por fase para {len(experiment_dirs)} experimentos")
+    return cpu_summary, gpu_summary
+
 def main():
     parser = argparse.ArgumentParser(description='Sumariza dados de tempo e recursos das estratégias Landsat')
     parser.add_argument('--input', '-i', type=str, default='../landsat-outputs',
@@ -319,6 +466,15 @@ def main():
                 if gpu_summary is not None:
                     save_summary_to_csv(gpu_summary, results_dir, strategy, algorithm, 'gpu')
                     total_files_generated += 1
+            
+            # Processa recursos por fase
+            cpu_by_phase, gpu_by_phase = summarize_resources_by_phase(base_path, strategy, algorithm)
+            if cpu_by_phase is not None:
+                save_summary_to_csv(cpu_by_phase, results_dir, strategy, algorithm, 'cpu_by_phase')
+                total_files_generated += 1
+            if gpu_by_phase is not None:
+                save_summary_to_csv(gpu_by_phase, results_dir, strategy, algorithm, 'gpu_by_phase')
+                total_files_generated += 1
     
     print("\n=== PROCESSAMENTO CONCLUÍDO ===")
     
@@ -340,6 +496,10 @@ def main():
                     print(f"  - cpu-time.csv")
                 if strategy != 'serial' and (strategy_path / 'gpu-time.csv').exists():
                     print(f"  - gpu-time.csv")
+                if (strategy_path / 'cpu-by-phase.csv').exists():
+                    print(f"  - cpu-by-phase.csv")
+                if strategy != 'serial' and (strategy_path / 'gpu-by-phase.csv').exists():
+                    print(f"  - gpu-by-phase.csv")
     
     print("\nProcessamento concluído com sucesso!")
 
