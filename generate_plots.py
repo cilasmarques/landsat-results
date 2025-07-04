@@ -251,6 +251,9 @@ def create_resource_plots(cpu_data, gpu_data, output_dir):
         cpu_data = cpu_data[cpu_data['strategy'].isin(valid_strategies)]
         cpu_data = cpu_data[cpu_data['strategy'].apply(lambda x: isinstance(x, str))]
         cpu_data['strategy'] = cpu_data['strategy'].astype(str)
+        # Normalizar uso de CPU para 0-100%
+        cpu_data['CPU_USAGE_PERCENTAGE_max'] = cpu_data['CPU_USAGE_PERCENTAGE_max'] / 12
+        cpu_data['MEM_USAGE_PERCENTAGE_max'] = cpu_data['MEM_USAGE_PERCENTAGE_max']
         # Aplicar ordem das estratégias e labels
         cpu_data = set_strategy_order(cpu_data)
         cpu_data = set_algorithm_labels(cpu_data)
@@ -259,7 +262,7 @@ def create_resource_plots(cpu_data, gpu_data, output_dir):
         # Boxplot CPU: Utilização máxima por execução
         p5 = (ggplot(cpu_data, aes(x='strategy', y='CPU_USAGE_PERCENTAGE_max', fill='algorithm')) +
               geom_boxplot(outlier_shape='o', outlier_size=2, width=0.7, alpha=0.7) +
-              labs(title='Distribuição da Utilização de CPU por Estratégia e Algoritmo',
+              labs(title='Distribuição da Utilização de CPU por Estratégia e Algoritmo (Normalizado 0-100%)',
                    x='Estratégia', y='CPU (%)', fill='Algoritmo') +
               theme(axis_text_x=element_text(rotation=45, hjust=1),
                     figure_size=(10, 6)))
@@ -318,6 +321,9 @@ def create_resource_by_phase_plots(cpu_by_phase_data, gpu_by_phase_data, time_da
         cpu_by_phase_data = cpu_by_phase_data[cpu_by_phase_data['strategy'].isin(valid_strategies)]
         cpu_by_phase_data = cpu_by_phase_data[cpu_by_phase_data['strategy'].apply(lambda x: isinstance(x, str))]
         cpu_by_phase_data['strategy'] = cpu_by_phase_data['strategy'].astype(str)
+        # Normalizar uso de CPU para 0-100%
+        cpu_by_phase_data['CPU_USAGE_PERCENTAGE_max_median'] = cpu_by_phase_data['CPU_USAGE_PERCENTAGE_max_median'] / 12
+        cpu_by_phase_data['MEM_USAGE_PERCENTAGE_max_median'] = cpu_by_phase_data['MEM_USAGE_PERCENTAGE_max_median']
         # Aplicar ordem das estratégias e labels
         cpu_by_phase_data = set_strategy_order(cpu_by_phase_data)
         cpu_by_phase_data = set_algorithm_labels(cpu_by_phase_data)
@@ -330,7 +336,7 @@ def create_resource_by_phase_plots(cpu_by_phase_data, gpu_by_phase_data, time_da
         p11 = (ggplot(cpu_by_phase_data, aes(x='PHASE', y='CPU_USAGE_PERCENTAGE_max_median', fill='strategy')) +
                geom_bar(stat='identity', position='dodge', width=0.7) +
                facet_wrap('~algorithm', scales='free_y', ncol=2) +
-               labs(title='Utilização de CPU por Fase (Mediana dos Máximos)',
+               labs(title='Utilização de CPU por Fase (Mediana dos Máximos, Normalizado 0-100%)',
                     x='Fase', y='CPU (%)', fill='Estratégia') +
                theme(axis_text_x=element_text(rotation=45, hjust=1),
                      figure_size=(14, 8)))
