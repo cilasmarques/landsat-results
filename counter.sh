@@ -1,13 +1,7 @@
 #!/bin/bash
 
 # Caminho base para os diretórios principais
-BASE_DIRS=(
-"/Users/cilasmfm/workspace/landsat-results/outputs/serial"
-"/Users/cilasmfm/workspace/landsat-results/outputs/kernels-streams-async"
-"/Users/cilasmfm/workspace/landsat-results/outputs/kernels-streams-sync"
-"/Users/cilasmfm/workspace/landsat-results/outputs/kernels-raw"
-"/Users/cilasmfm/workspace/landsat-results/outputs/kernels-pc"
-)
+BASE_DIRS=("/Users/cilasmfm/workspace/landsat-results/results/output-csv-lsd-0707/")
 
 # Loop por cada diretório base
 for base_dir in "${BASE_DIRS[@]}"; do
