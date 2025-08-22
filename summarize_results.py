@@ -6,7 +6,7 @@ Este script processa todos os arquivos CSV de tempo, CPU, GPU, SSD I/O e CPU Pow
 e algoritmos, calculando estatísticas (mediana, média, desvio padrão, etc.) e salvando
 os resultados em arquivos CSV dentro de cada diretório de estratégia/algoritmo.
 
-Adaptado para a estrutura output-csv-lsd-0707.
+Adaptado para a estrutura output-csv-lsd-1508.
 """
 
 import pandas as pd
@@ -612,8 +612,8 @@ def summarize_resources_by_phase(base_path, strategy_algorithm):
 
 def main():
     parser = argparse.ArgumentParser(description='Sumariza dados de tempo e recursos das estratégias Landsat')
-    parser.add_argument('--input', '-i', type=str, default='results/output-csv-lsd-0707',
-                       help='Caminho para o diretório output-csv-lsd-0707 (padrão: results/output-csv-lsd-0707)')
+    parser.add_argument('--input', '-i', type=str, default='results/output-csv-lsd-1508',
+                       help='Caminho para o diretório output-csv-lsd-1508 (padrão: results/output-csv-lsd-1508)')
     parser.add_argument('--verbose', '-v', action='store_true',
                        help='Modo verboso')
     
@@ -633,20 +633,14 @@ def main():
     
     # Estratégias/algoritmos disponíveis (baseado na nova estrutura)
     strategy_algorithms = [
-        'parallel2-sebal',
-        'parallel4-sebal', 
-        'parallel8-sebal',
-        'parallel12-sebal',
-        'parallel2-steep',
-        'parallel4-steep',
-        'parallel8-steep', 
-        'parallel12-steep',
-        'kernels-raw-sebal',
-        'kernels-raw-steep',
-        'kernels-streams-sebal',
-        'kernels-streams-steep',
-        'serial-sebal',
-        'serial-steep'
+        'kernels-double-fm-r-sebal'       ,'serial-double-r-sebal',
+        'kernels-double-fm-r-steep'       ,'serial-double-r-steep',
+        'kernels-double-fm-st-sebal'      ,'serial-double-st-sebal',
+        'kernels-double-fm-st-steep'      ,'serial-double-st-steep',
+        'kernels-float-r-sebal'           ,'serial-float-r-sebal',
+        'kernels-float-r-steep'           ,'serial-float-r-steep',
+        'kernels-float-st-sebal'          ,'serial-float-st-sebal',
+        'kernels-float-st-steep'          ,'serial-float-st-steep',
     ]
     
     if args.verbose:
