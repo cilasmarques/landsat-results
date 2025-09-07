@@ -1,5 +1,3 @@
 .venv/*
-results/*
-summarized_results/*
-outpus/*
-_P6.py
+results*/*
+_ignore/*
