@@ -635,12 +635,10 @@ def main():
     strategy_algorithms = [
         'kernels-double-fm-r-sebal'       ,'serial-double-r-sebal',
         'kernels-double-fm-r-steep'       ,'serial-double-r-steep',
-        'kernels-double-fm-st-sebal'      ,'serial-double-st-sebal',
-        'kernels-double-fm-st-steep'      ,'serial-double-st-steep',
-        'kernels-float-r-sebal'           ,'serial-float-r-sebal',
-        'kernels-float-r-steep'           ,'serial-float-r-steep',
-        'kernels-float-st-sebal'          ,'serial-float-st-sebal',
-        'kernels-float-st-steep'          ,'serial-float-st-steep',
+        'kernels-double-fm-st-sebal'      ,'kernels-double-fm-sr-steep',
+        'kernels-double-fm-st-steep'      ,'kernels-double-fm-sr-steep',
+        'kernels-float-st-sebal'          ,
+        'kernels-float-st-steep'          
     ]
     
     if args.verbose:
