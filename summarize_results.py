@@ -6,7 +6,7 @@ Este script processa todos os arquivos CSV de tempo, CPU, GPU, SSD I/O e CPU Pow
 e algoritmos, calculando estatísticas (mediana, média, desvio padrão, etc.) e salvando
 os resultados em arquivos CSV dentro de cada diretório de estratégia/algoritmo.
 
-Adaptado para a estrutura output-csv-lsd-1508.
+Adaptado para a estrutura.
 """
 
 import pandas as pd
@@ -612,8 +612,8 @@ def summarize_resources_by_phase(base_path, strategy_algorithm):
 
 def main():
     parser = argparse.ArgumentParser(description='Sumariza dados de tempo e recursos das estratégias Landsat')
-    parser.add_argument('--input', '-i', type=str, default='results/output-csv-lsd-1508',
-                       help='Caminho para o diretório output-csv-lsd-1508 (padrão: results/output-csv-lsd-1508)')
+    parser.add_argument('--input', '-i', type=str, default='results',
+                       help='Caminho para o diretório (padrão: results)')
     parser.add_argument('--verbose', '-v', action='store_true',
                        help='Modo verboso')
     
@@ -621,7 +621,7 @@ def main():
     
     # Configuração dos caminhos
     base_path = Path(args.input)
-    results_dir = Path('summarized_results')
+    results_dir = Path('summarized-results')
     
     # Verifica se o diretório de entrada existe
     if not base_path.exists():

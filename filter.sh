@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Caminho para o diretório onde buscar os arquivos
-BASE_DIR="/Users/cilasmfm/workspace/landsat-results/results/output-csv-lsd-0707/"
+BASE_DIR="/Users/cilasmfm/workspace/landsat-results/results"
 
 # Encontrar todos os arquivos time.csv e verificar se estão vazios
 

@@ -1,3 +1,6 @@
 .venv/*
 results*/*
 _ignore/*
+tmp/*
+summarized-results/*
+summarized-groups/*
