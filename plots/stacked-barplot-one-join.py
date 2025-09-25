@@ -267,8 +267,8 @@ def create_one_join_stacked_barplot_clean(macrogroup_data, output_dir):
             
 def main():
     """Função principal"""
-    input_dir = Path('summarized_results_grouped')
-    output_dir = Path('stacked-barplots-one-join')
+    input_dir = Path('summarized-groups')
+    output_dir = Path('images/stacked-barplots-one-join')
     output_dir.mkdir(exist_ok=True)
     
     print("=== GERAÇÃO DE STACKED BARPLOT VERTICAL SERIAL ===")

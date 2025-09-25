@@ -354,8 +354,8 @@ def create_cpu_vs_gpu_stacked_barplot_with_labels(macrogroup_data, output_dir):
 
 def main():
     """Função principal"""
-    input_dir = Path('summarized_results_grouped')
-    output_dir = Path('stacked-barplot-two')
+    input_dir = Path('summarized-groups')
+    output_dir = Path('images/stacked-barplots-two')
     
     # Criar diretório de saída se não existir
     output_dir.mkdir(exist_ok=True)

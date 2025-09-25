@@ -15,13 +15,13 @@ warnings.filterwarnings('ignore')
 
 # Estratégias Serial para comparação
 CPU_STRATEGIES = [
-    'serial-double-r-sebal', 'serial-double-r-steep'
+    'kernels-double-fm-r-sebal', 'kernels-double-fm-r-steep'
 ]
 
 # Mapeamento para nomes das abordagens
 STRATEGY_LABELS = {
-    'serial-double-r-sebal': 'Serial',
-    'serial-double-r-steep': 'Serial'
+    'kernels-double-fm-r-sebal': 'GPU SIMD',
+    'kernels-double-fm-r-steep': 'GPU SIMD'
 }
 
 def load_macrogroup_data(input_dir):
@@ -216,7 +216,7 @@ def create_one_stacked_barplot_clean(macrogroup_data, output_dir):
                                color='black', 
                                fontweight='bold') +
                      scale_fill_manual(values=alg_colors, name='Fase', limits=ordem_legenda) +
-                     scale_y_continuous(breaks=np.arange(0, alg_data['Tempo (s) Ajustado'].max() + 2, 2)) +
+                     scale_y_continuous(breaks=np.arange(0, alg_data['Tempo (s) Ajustado'].max() + 1, 0.2)) +
                      labs(title=f'{algorithm} - Tempo por Fase',
                           x='Algoritmo', 
                           y='Tempo (s)',
@@ -239,8 +239,8 @@ def create_one_stacked_barplot_clean(macrogroup_data, output_dir):
             
 def main():
     """Função principal"""
-    input_dir = Path('summarized_results_grouped')
-    output_dir = Path('stacked-barplots-one')
+    input_dir = Path('summarized-groups')
+    output_dir = Path('images/stacked-barplots-one')
     output_dir.mkdir(exist_ok=True)
     
     print("=== GERAÇÃO DE STACKED BARPLOT one SERIAL ===")

@@ -460,8 +460,8 @@ def create_4_lines_heatmap_no_io(macrogroup_data, output_dir):
 
 def main():
     """Função principal"""
-    input_dir = Path('summarized_results_grouped')
-    output_dir = Path('heatmaps-4-linhas')
+    input_dir = Path('summarized-groups')
+    output_dir = Path('images/heatmaps-4-linhas')
     
     # Criar diretório de saída se não existir
     output_dir.mkdir(exist_ok=True)

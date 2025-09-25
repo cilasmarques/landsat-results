@@ -311,8 +311,8 @@ def create_combined_barplot_with_ci(data, output_dir):
 
 def main():
     """Função principal"""
-    input_dir = Path('results_raw')
-    output_dir = Path('barplots-with-confidence-intervals')
+    input_dir = Path('results') 
+    output_dir = Path('images/barplots-with-confidence-intervals')
     output_dir.mkdir(exist_ok=True)
     
     print("=== GERAÇÃO DE GRÁFICOS DE BARRAS COM INTERVALOS DE CONFIANÇA ===")

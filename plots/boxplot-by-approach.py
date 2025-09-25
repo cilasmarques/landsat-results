@@ -259,8 +259,8 @@ def create_combined_boxplot(data, output_dir):
 
 def main():
     """Função principal"""
-    input_dir = Path('results_raw')
-    output_dir = Path('boxplots-by-approach')
+    input_dir = Path('results')
+    output_dir = Path('images/boxplots-by-approach')
     output_dir.mkdir(exist_ok=True)
     
     print("=== GERAÇÃO DE BOXPLOTS POR ABORDAGEM ===")
