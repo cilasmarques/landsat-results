@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Caminho base para os diretórios principais
-BASE_DIRS=("/Users/cilasmfm/workspace/landsat-results/results/output-csv-lsd-0707/")
+BASE_DIRS=("/Users/cilasmfm/workspace/landsat-results/results/")
 
 # Loop por cada diretório base
 for base_dir in "${BASE_DIRS[@]}"; do

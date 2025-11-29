@@ -7,10 +7,16 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # Estratégias para comparação CPU vs GPU
-STRATEGIES = [
+STRATEGIES_STEEP = [
     'kernels-double-fm-st-steep',      # CPU
     'kernels-double-fm-r-steep',   # GPU
     'kernels-float-st-steep'        # Precisão Simples
+]
+
+STRATEGIES_SEBAL = [
+    'kernels-double-fm-st-sebal',      # CPU
+    'kernels-double-fm-r-sebal',   # GPU
+    'kernels-float-st-sebal'        # Precisão Simples
 ]
 
 # Mapeamento para nomes das abordagens
@@ -18,9 +24,12 @@ STRATEGY_LABELS = {
     'kernels-double-fm-r-steep': 'SIMD',
     'kernels-double-fm-st-steep': 'Leitura\nOtimizada',
     'kernels-float-st-steep': 'Precisão\nSimples',
+    'kernels-double-fm-r-sebal': 'SIMD',
+    'kernels-double-fm-st-sebal': 'Leitura\nOtimizada',
+    'kernels-float-st-sebal': 'Precisão\nSimples',
 }
 
-def load_macrogroup_data(input_dir):
+def load_macrogroup_data(input_dir, strategies):
     """Carrega dados das etapas do diretório summarized_results_grouped"""
     input_path = Path(input_dir)
     
@@ -30,7 +39,7 @@ def load_macrogroup_data(input_dir):
     all_data = []
     
     # Listar apenas as estratégias especificadas
-    strategy_dirs = [d for d in input_path.iterdir() if d.is_dir() and not d.name.startswith('.') and d.name in STRATEGIES]
+    strategy_dirs = [d for d in input_path.iterdir() if d.is_dir() and not d.name.startswith('.') and d.name in strategies]
     
     print(f"Carregando dados de {len(strategy_dirs)} estratégias...")
     
@@ -68,9 +77,11 @@ def extract_strategy_and_algorithm(df):
     for _, row in df.iterrows():
         strategy_alg = row['strategy_algorithm']
         
-        # Determinar algorithm (STEEP)
+        # Determinar algorithm (STEEP ou SEBAL)
         if 'steep' in strategy_alg.lower():
             algorithm_mapping[strategy_alg] = 'STEEP'
+        elif 'sebal' in strategy_alg.lower():
+            algorithm_mapping[strategy_alg] = 'SEBAL'
         else:
             algorithm_mapping[strategy_alg] = 'UNKNOWN'
         
@@ -134,7 +145,7 @@ def prepare_three_phase_data(macrogroup_data):
     
     return df, phase_mapping, phase_order
 
-def create_cpu_vs_gpu_stacked_barplot_clean(macrogroup_data, output_dir):
+def create_cpu_vs_gpu_stacked_barplot_clean(macrogroup_data, output_dir, algorithm):
     """Cria stacked barplot comparando CPU vs GPU SEM informações dentro das barras"""
     df, phase_mapping, phase_order = prepare_three_phase_data(macrogroup_data)
     
@@ -195,25 +206,21 @@ def create_cpu_vs_gpu_stacked_barplot_clean(macrogroup_data, output_dir):
     # Isto garante que a primeira cor na legenda corresponde à barra no topo
     ordem_legenda = list(reversed(phase_order))
     
-    # Paletas de cores por estratégia
-    colors_cpu = {
+    # Cores específicas por algoritmo
+    colors_steep = {
         'Escrita dos dados\nde saída': '#bdbfbf',      # Cinza
         'Processamento': '#4ECDC4',                     # Azul médio
         'Leitura dos dados\nde entrada': '#00bdbd'     # Azul forte
     }
     
-    colors_gpu = {
+    colors_sebal = {
+        'Leitura dos dados\nde entrada': '#fc3a3a',     # Vermelho forte
+        'Processamento': '#ff8a8a',                     # Vermelho médio
         'Escrita dos dados\nde saída': '#bdbfbf',      # Cinza
-        'Processamento': '#4ECDC4',                     # Azul médio
-        'Leitura dos dados\nde entrada': '#00bdbd'     # Azul forte
     }
     
-    # Cores padrão para gráficos combinados
-    colors = {
-        'Escrita dos dados\nde saída': '#bdbfbf',      # Cinza
-        'Processamento': '#4ECDC4',                     # Azul médio
-        'Leitura dos dados\nde entrada': '#00bdbd'     # Azul forte
-    }
+    # Selecionar cores baseado no algoritmo
+    colors = colors_sebal if algorithm == 'SEBAL' else colors_steep
     
     # Criar o plot principal (SEM informações dentro das barras)
     p = (ggplot(plot_df, aes(x='Estratégia', y='Tempo (s)', fill='Fase')) +
@@ -221,7 +228,7 @@ def create_cpu_vs_gpu_stacked_barplot_clean(macrogroup_data, output_dir):
          scale_fill_manual(values=colors, name='Fase', limits=ordem_legenda) +
          scale_x_discrete(limits=['Precisão\nSimples', 'Leitura\nOtimizada', 'SIMD']) +
          scale_y_continuous(breaks=np.arange(0, 1.8 + 0.2, 0.2)) +
-         labs(title='STEEP - Tempo por Fase',
+         labs(title=f'{algorithm} - Tempo por Fase',
               x='Algoritmo', 
               y='Tempo (s)',
               fill='Fase') +
@@ -238,11 +245,11 @@ def create_cpu_vs_gpu_stacked_barplot_clean(macrogroup_data, output_dir):
                figure_size=(16, 4)))
     
     # Salvar o plot principal limpo
-    filename = "stacked_barplot_three.png"
+    filename = f"stacked_barplot_{algorithm.lower()}_three.png"
     p.save(output_dir / filename, dpi=300, bbox_inches='tight')
     print(f"    Salvo: {output_dir / filename}")
 
-def create_cpu_vs_gpu_stacked_barplot_with_labels(macrogroup_data, output_dir):
+def create_cpu_vs_gpu_stacked_barplot_with_labels(macrogroup_data, output_dir, algorithm):
     """Cria stacked barplot comparando CPU vs GPU COM informações dentro das barras"""
     df, phase_mapping, phase_order = prepare_three_phase_data(macrogroup_data)
     
@@ -315,12 +322,21 @@ def create_cpu_vs_gpu_stacked_barplot_with_labels(macrogroup_data, output_dir):
     # Isto garante que a primeira cor na legenda corresponde à barra no topo
     ordem_legenda = list(reversed(phase_order))
     
-    # Cores padrão para gráficos combinados
-    colors = {
+    # Cores específicas por algoritmo
+    colors_steep = {
         'Escrita dos dados\nde saída': '#bdbfbf',      # Cinza
         'Processamento': '#4ECDC4',                     # Azul médio
         'Leitura dos dados\nde entrada': '#00bdbd'     # Azul forte
     }
+    
+    colors_sebal = {
+        'Leitura dos dados\nde entrada': '#fc3a3a',     # Vermelho forte
+        'Processamento': '#ff8a8a',                     # Vermelho médio
+        'Escrita dos dados\nde saída': '#bdbfbf',      # Cinza
+    }
+    
+    # Selecionar cores baseado no algoritmo
+    colors = colors_sebal if algorithm == 'SEBAL' else colors_steep
     
     # Criar o plot principal COM informações dentro das barras
     p = (ggplot(plot_df, aes(x='Estratégia', y='Tempo (s)', fill='Fase')) +
@@ -333,7 +349,7 @@ def create_cpu_vs_gpu_stacked_barplot_with_labels(macrogroup_data, output_dir):
          scale_fill_manual(values=colors, name='Fase', limits=ordem_legenda) +
          scale_x_discrete(limits=['Precisão\nSimples','Leitura\nOtimizada','SIMD']) +
          scale_y_continuous(breaks=np.arange(0, 1.8 + 0.2, 0.2)) +
-         labs(title='STEEP - Tempo por Fase',
+         labs(title=f'{algorithm} - Tempo por Fase',
               x='Algoritmo', 
               y='Tempo (s)',
               fill='Fase') +
@@ -350,7 +366,7 @@ def create_cpu_vs_gpu_stacked_barplot_with_labels(macrogroup_data, output_dir):
                figure_size=(16, 4)))
     
     # Salvar o plot com labels
-    filename = "stacked_barplot_three_with_labels.png"
+    filename = f"stacked_barplot_{algorithm.lower()}_three_with_labels.png"
     p.save(output_dir / filename, dpi=300, bbox_inches='tight')
     print(f"    Salvo: {output_dir / filename}")
 
@@ -366,18 +382,27 @@ def main():
     print(f"Diretório de entrada: {input_dir}")
     print(f"Diretório de saída: {output_dir}")
     
-    # Carregar dados das etapas
-    try:
-        macrogroup_data = load_macrogroup_data(input_dir)
-    except Exception as e:
-        print(f"Erro ao carregar dados: {e}")
-        return
+    # Processar ambos algoritmos
+    algorithms = [
+        ('STEEP', STRATEGIES_STEEP),
+        ('SEBAL', STRATEGIES_SEBAL)
+    ]
     
-    print("\n=== GERANDO STACKED BARPLOT CPU vs GPU (VERSÃO LIMPA) ===")
-    create_cpu_vs_gpu_stacked_barplot_clean(macrogroup_data, output_dir)
-    
-    print("\n=== GERANDO STACKED BARPLOT CPU vs GPU (COM LABELS) ===")
-    create_cpu_vs_gpu_stacked_barplot_with_labels(macrogroup_data, output_dir)
+    for algorithm_name, strategies in algorithms:
+        print(f"\n=== PROCESSANDO ALGORITMO: {algorithm_name} ===")
+        
+        # Carregar dados das etapas
+        try:
+            macrogroup_data = load_macrogroup_data(input_dir, strategies)
+        except Exception as e:
+            print(f"Erro ao carregar dados para {algorithm_name}: {e}")
+            continue
+        
+        print(f"\n=== GERANDO STACKED BARPLOT {algorithm_name} (VERSÃO LIMPA) ===")
+        create_cpu_vs_gpu_stacked_barplot_clean(macrogroup_data, output_dir, algorithm_name)
+        
+        print(f"\n=== GERANDO STACKED BARPLOT {algorithm_name} (COM LABELS) ===")
+        create_cpu_vs_gpu_stacked_barplot_with_labels(macrogroup_data, output_dir, algorithm_name)
     
     print("\n=== GERAÇÃO CONCLUÍDA ===")
     print(f"Plots salvos em: {output_dir}")
