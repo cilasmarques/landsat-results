@@ -8,25 +8,25 @@ warnings.filterwarnings('ignore')
 
 # Estratégias para comparação CPU vs GPU
 STRATEGIES_STEEP = [
-    'kernels-double-fm-st-steep',      # CPU
+    'kernels-double-fm-s-steep',      # CPU
     'kernels-double-fm-r-steep',   # GPU
-    'kernels-float-st-steep'        # Precisão Simples
+    'kernels-float-fm-s-steep'        # Precisão Simples
 ]
 
 STRATEGIES_SEBAL = [
-    'kernels-double-fm-st-sebal',      # CPU
+    'kernels-double-fm-s-sebal',      # CPU
     'kernels-double-fm-r-sebal',   # GPU
-    'kernels-float-st-sebal'        # Precisão Simples
+    'kernels-float-fm-s-sebal'        # Precisão Simples
 ]
 
 # Mapeamento para nomes das abordagens
 STRATEGY_LABELS = {
     'kernels-double-fm-r-steep': 'SIMD',
-    'kernels-double-fm-st-steep': 'Leitura\nOtimizada',
-    'kernels-float-st-steep': 'Precisão\nSimples',
+    'kernels-double-fm-s-steep': 'Leitura\nOtimizada',
+    'kernels-float-fm-s-steep': 'Precisão\nSimples',
     'kernels-double-fm-r-sebal': 'SIMD',
-    'kernels-double-fm-st-sebal': 'Leitura\nOtimizada',
-    'kernels-float-st-sebal': 'Precisão\nSimples',
+    'kernels-double-fm-s-sebal': 'Leitura\nOtimizada',
+    'kernels-float-fm-s-sebal': 'Precisão\nSimples',
 }
 
 def load_macrogroup_data(input_dir, strategies):

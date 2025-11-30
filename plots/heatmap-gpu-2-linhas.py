@@ -14,15 +14,15 @@ warnings.filterwarnings('ignore')
 # Estratégias para comparação de 2 linhas
 STRATEGIES_2_LINES = [
     'serial-double-r-sebal', 'serial-double-r-steep',
-    'kernels-float-st-sebal', 'kernels-float-st-steep'
+    'kernels-float-fm-s-sebal', 'kernels-float-fm-s-steep'
 ]
 
 # Mapeamento para nomes das abordagens
 STRATEGY_LABELS = {
     'serial-double-r-sebal': 'CPU',
     'serial-double-r-steep': 'CPU',
-    'kernels-float-st-sebal': 'GPU',
-    'kernels-float-st-steep': 'GPU'
+    'kernels-float-fm-s-sebal': 'GPU',
+    'kernels-float-fm-s-steep': 'GPU'
 }
 
 def load_macrogroup_data(input_dir):

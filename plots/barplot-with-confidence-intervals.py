@@ -179,12 +179,6 @@ def create_individual_barplots_with_ci(data, output_dir):
         if approach_data.empty:
             continue
         
-        # Obter informações da abordagem
-        algorithm = approach_data['algorithm'].iloc[0]
-        approach_type = approach_data['approach_type'].iloc[0]
-        precision = approach_data['precision'].iloc[0]
-        memory_type = approach_data['memory_type'].iloc[0]
-        
         # Calcular estatísticas para barras e intervalos de confiança
         stats_data = []
         for alg in approach_data['algorithm'].unique():
@@ -274,10 +268,10 @@ def create_combined_barplot_with_ci(data, output_dir):
         'serial-double-r-steep',
         'kernels-double-fm-r-sebal',
         'kernels-double-fm-r-steep',
-        'kernels-double-fm-st-sebal',
-        'kernels-double-fm-st-steep',
-        'kernels-float-st-sebal',
-        'kernels-float-st-steep'
+        'kernels-double-fm-s-sebal',
+        'kernels-double-fm-s-steep',
+        'kernels-float-fm-s-sebal',
+        'kernels-float-fm-s-steep'
     ]
     
     # Converter approach para Categorical com ordem personalizada

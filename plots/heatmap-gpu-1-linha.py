@@ -13,13 +13,13 @@ warnings.filterwarnings('ignore')
 
 # Estratégias GPU para comparação (apenas GPU)
 GPU_STRATEGIES = [
-    'kernels-float-st-sebal', 'kernels-float-st-steep'
+    'kernels-float-fm-s-sebal', 'kernels-float-fm-s-steep'
 ]
 
 # Mapeamento para nomes das abordagens
 STRATEGY_LABELS = {
-    'kernels-float-st-sebal': 'GPU',
-    'kernels-float-st-steep': 'GPU'
+    'kernels-float-fm-s-sebal': 'GPU',
+    'kernels-float-fm-s-steep': 'GPU'
 }
 
 def load_macrogroup_data(input_dir):

@@ -15,13 +15,13 @@ warnings.filterwarnings('ignore')
 
 # Estratégias Serial para comparação
 GPU_STRATEGIES = [
-    'kernels-double-fm-st-sebal', 'kernels-double-fm-st-steep'
+    'kernels-double-fm-s-sebal', 'kernels-double-fm-s-steep'
 ]
 
 # Mapeamento para nomes das abordagens
 STRATEGY_LABELS = {
-    'kernels-double-fm-st-sebal': 'Leitura\nOtimizada',
-    'kernels-double-fm-st-steep': 'Leitura\nOtimizada'
+    'kernels-double-fm-s-sebal': 'Leitura\nOtimizada',
+    'kernels-double-fm-s-steep': 'Leitura\nOtimizada'
 }
 
 def load_macrogroup_data(input_dir):

@@ -14,18 +14,18 @@ warnings.filterwarnings('ignore')
 # Estratégias GPU para comparação
 GPU_STRATEGIES = [
     'kernels-double-fm-r-sebal', 'kernels-double-fm-r-steep',
-    'kernels-double-fm-st-sebal', 'kernels-double-fm-st-steep',
-    'kernels-float-st-sebal', 'kernels-float-st-steep'
+    'kernels-double-fm-s-sebal', 'kernels-double-fm-s-steep',
+    'kernels-float-fm-s-sebal', 'kernels-float-fm-s-steep'
 ]
 
 # Mapeamento para nomes das abordagens
 STRATEGY_LABELS = {
     'kernels-double-fm-r-sebal': 'GPU',
     'kernels-double-fm-r-steep': 'GPU',
-    'kernels-double-fm-st-sebal': 'GPU leitura paralela',
-    'kernels-double-fm-st-steep': 'GPU leitura paralela',
-    'kernels-float-st-sebal': 'GPU Float',
-    'kernels-float-st-steep': 'GPU Float'
+    'kernels-double-fm-s-sebal': 'GPU leitura paralela',
+    'kernels-double-fm-s-steep': 'GPU leitura paralela',
+    'kernels-float-fm-s-sebal': 'GPU Float',
+    'kernels-float-fm-s-steep': 'GPU Float'
 }
 
 def load_macrogroup_data(input_dir):
